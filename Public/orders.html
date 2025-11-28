@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Order History | Pizza Hut Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+    body{background:#f3f4f6;color:#111827;}
+    header{background:#111827;color:#f9fafb;padding:.7rem 1rem;display:flex;justify-content:space-between;align-items:center;}
+    a{text-decoration:none;color:inherit;}
+    .logo{font-weight:700;}
+    main{max-width:900px;margin:1.5rem auto;padding:0 1rem;}
+    h1{font-size:1.5rem;margin-bottom:.3rem;}
+    p{font-size:.9rem;color:#6b7280;margin-bottom:1rem;}
+    .table-wrapper{background:#fff;border-radius:.9rem;padding:.8rem;box-shadow:0 4px 10px rgba(15,23,42,.06);border:1px solid #e5e7eb;}
+    table{width:100%;border-collapse:collapse;font-size:.85rem;}
+    thead{background:#f9fafb;}
+    th,td{padding:.55rem .5rem;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap;}
+    th{font-size:.75rem;text-transform:uppercase;color:#6b7280;letter-spacing:.05em;}
+    tbody tr:hover{background:#f9fafb;}
+    .status-badge{padding:.15rem .5rem;border-radius:999px;font-size:.7rem;font-weight:600;display:inline-block;}
+    .status-pending{background:#fef3c7;color:#92400e;}
+    .status-preparing{background:#e0f2fe;color:#075985;}
+    .status-delivered{background:#dcfce7;color:#166534;}
+    .status-cancelled{background:#fee2e2;color:#991b1b;}
+    .top-link{font-size:.8rem;color:#2563eb;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🍕 Pizza Hut Style</div>
+    <a href="/index.html" class="top-link">← Back to Home</a>
+  </header>
+
+  <main>
+    <h1>Your Recent Orders</h1>
+    <p>All orders placed from this demo site (no login tracking yet).</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Pizza</th>
+            <th>Qty</th>
+            <th>Amount (₹)</th>
+            <th>Status</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    function statusClass(status) {
+      switch (status) {
+        case "Pending": return "status-pending";
+        case "Preparing": return "status-preparing";
+        case "Delivered": return "status-delivered";
+        case "Cancelled": return "status-cancelled";
+        default: return "";
+      }
+    }
+
+    async function loadOrders() {
+      try {
+        const res = await fetch("/api/orders");
+        const data = await res.json();
+        const tbody = document.getElementById("ordersBody");
+        tbody.innerHTML = "";
+        data.slice().reverse().forEach(order => {
+          const tr = document.createElement("tr");
+          const date = new Date(order.createdAt || Date.now());
+          tr.innerHTML = `
+            <td>${order.id}</td>
+            <td>${order.customer}</td>
+            <td>${order.pizza} (${order.size})</td>
+            <td>${order.qty}</td>
+            <td>₹${order.amount}</td>
+            <td><span class="status-badge ${statusClass(order.status)}">${order.status}</span></td>
+            <td>${date.toLocaleString()}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>

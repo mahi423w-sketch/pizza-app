@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "name": "Classic Margherita",
+    "price": 249,
+    "tag": "Cheesy · Veg",
+    "image": "https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg?auto=compress",
+    "category": "Featured"
+  },
+  {
+    "id": 2,
+    "name": "Veggie Overload",
+    "price": 299,
+    "tag": "Loaded Veggies",
+    "image": "https://images.pexels.com/photos/803290/pexels-photo-803290.jpeg?auto=compress",
+    "category": "Featured"
+  },
+  {
+    "id": 3,
+    "name": "Spicy Paneer Blast",
+    "price": 329,
+    "tag": "Paneer · Spicy",
+    "image": "https://images.pexels.com/photos/1435908/pexels-photo-1435908.jpeg?auto=compress",
+    "category": "Spicy"
+  },
+  {
+    "id": 1764358312316,
+    "name": "chies pizza",
+    "price": 199,
+    "tag": "chees .",
+    "image": "",
+    "category": "veg"
+  }
+]

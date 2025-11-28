@@ -1,0 +1,12 @@
+{
+  "name": "pizza-app",
+  "version": "1.0.0",
+  "description": "Pizza Hut style website with Node.js backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.0"
+  }
+}

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pizza Hut Style Admin Panel</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+    :root{--red:#d31f26;--dark:#111827;--light:#ffffff;--gray:#9ca3af;--bg:#f3f4f6;--card:#ffffff;}
+    body{background:var(--bg);color:#111827;}
+    a{text-decoration:none;color:inherit;}
+    .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+    .sidebar{
+      background:var(--dark);color:var(--light);padding:1rem 1.2rem;
+      display:flex;flex-direction:column;gap:1.5rem;position:sticky;top:0;height:100vh;
+    }
+    .brand{display:flex;align-items:center;gap:.7rem;}
+    .brand-icon{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ffedb5,#f7941d);border:2px solid var(--red);position:relative;overflow:hidden;}
+    .brand-icon::after{content:"";position:absolute;width:120%;height:40%;background:var(--red);top:35%;left:-10%;transform:rotate(-10deg);}
+    .brand-text{font-weight:700;font-size:1.05rem;letter-spacing:.5px;}
+    .tag{font-size:.7rem;text-transform:uppercase;color:var(--gray);margin-top:-5px;}
+    .nav-title{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gray);}
+    .nav{display:flex;flex-direction:column;gap:.25rem;margin-top:-.4rem;}
+    .nav button{
+      text-align:left;width:100%;border:none;background:transparent;color:#e5e7eb;
+      padding:.55rem .5rem;border-radius:.5rem;font-size:.9rem;cursor:pointer;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .nav button span{font-size:.75rem;color:var(--gray);}
+    .nav button.active,.nav button:hover{background:rgba(243,244,246,.1);}
+    .sidebar-footer{margin-top:auto;font-size:.75rem;color:var(--gray);}
+    .sidebar-footer a{color:#fbbf24;font-size:.8rem;}
+    .main{padding:.85rem 1.2rem 1.5rem;display:flex;flex-direction:column;gap:1rem;}
+    .topbar{display:flex;justify-content:space-between;align-items:center;padding:.6rem .3rem .4rem;}
+    .topbar-left h1{font-size:1.2rem;font-weight:600;}
+    .topbar-left p{font-size:.8rem;color:#6b7280;}
+    .topbar-right{display:flex;align-items:center;gap:.7rem;font-size:.8rem;color:#6b7280;}
+    .badge-status{padding:.25rem .6rem;border-radius:999px;background:#ecfdf5;color:#16a34a;font-size:.75rem;font-weight:600;}
+    .admin-avatar{width:32px;height:32px;border-radius:999px;background:linear-gradient(135deg,var(--red),#f97316);display:flex;align-items:center;justify-content:center;color:var(--light);font-weight:700;font-size:.85rem;}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.9rem;}
+    .stat-card{background:var(--card);border-radius:.9rem;padding:.75rem .9rem;box-shadow:0 4px 10px rgba(15,23,42,.06);border:1px solid #e5e7eb;display:flex;flex-direction:column;gap:.25rem;}
+    .stat-title{font-size:.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;}
+    .stat-value{font-size:1.3rem;font-weight:700;}
+    .stat-sub{font-size:.75rem;color:#6b7280;}
+    .stat-pill{margin-left:auto;font-size:.7rem;padding:.15rem .45rem;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:600;}
+    .section{background:var(--card);border-radius:.9rem;padding:.9rem;box-shadow:0 4px 10px rgba(15,23,42,.06);border:1px solid #e5e7eb;margin-top:.2rem;}
+    .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem;}
+    .section-header h2{font-size:1rem;}
+    .section-header p{font-size:.8rem;color:#6b7280;}
+    .section-header button{border:none;background:#111827;color:#f9fafb;border-radius:999px;padding:.3rem .8rem;font-size:.8rem;cursor:pointer;}
+    .table-wrapper{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:.85rem;}
+    thead{background:#f9fafb;}
+    th,td{padding:.55rem .5rem;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap;}
+    th{font-size:.75rem;text-transform:uppercase;color:#6b7280;letter-spacing:.05em;}
+    tbody tr:hover{background:#f9fafb;}
+    .status-badge{padding:.15rem .5rem;border-radius:999px;font-size:.7rem;font-weight:600;display:inline-block;}
+    .status-pending{background:#fef3c7;color:#92400e;}
+    .status-preparing{background:#e0f2fe;color:#075985;}
+    .status-delivered{background:#dcfce7;color:#166534;}
+    .status-cancelled{background:#fee2e2;color:#991b1b;}
+    select{font-size:.75rem;padding:.1rem .25rem;}
+    .btn-small{border:none;background:transparent;font-size:.78rem;cursor:pointer;color:#dc2626;}
+    .btn-small:hover{text-decoration:underline;}
+    .mini-form{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem;}
+    .mini-form input{padding:.35rem .4rem;font-size:.8rem;border-radius:.45rem;border:1px solid #d1d5db;min-width:120px;flex:1;}
+    .mini-form button{border:none;background:var(--red);color:var(--light);border-radius:999px;padding:.32rem .8rem;font-size:.8rem;cursor:pointer;font-weight:600;}
+    .content-section{display:none;}
+    .content-section.active{display:block;}
+    .mobile-topbar{display:none;background:var(--dark);color:var(--light);padding:.4rem .8rem;justify-content:space-between;align-items:center;}
+    .mobile-topbar button{border:none;background:transparent;color:var(--light);cursor:pointer;font-size:.85rem;}
+    @media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{display:none;height:auto;position:static;}.mobile-topbar{display:flex;}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media(max-width:600px){.stats-grid{grid-template-columns:1fr;}.main{padding:.8rem;}}
+  </style>
+</head>
+<body>
+  <div class="mobile-topbar">
+    <div>🍕 Admin Panel</div>
+    <button id="mobileMenuToggle">☰ Menu</button>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="brand">
+          <div class="brand-icon"></div>
+          <div>
+            <div class="brand-text">Pizza Hut Style</div>
+            <div class="tag">Admin Dashboard</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="nav-title">Navigation</div>
+        <div class="nav">
+          <button class="nav-btn active" data-target="dashboard">
+            Dashboard <span>Overview</span>
+          </button>
+          <button class="nav-btn" data-target="orders">
+            Orders <span>Manage</span>
+          </button>
+          <button class="nav-btn" data-target="menu">
+            Menu Items <span>Edit</span>
+          </button>
+          <button class="nav-btn" data-target="settings">
+            Settings <span>Basic</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>Demo admin panel for learning purpose only.</p>
+        <p><a href="/index.html" target="_blank">↗ Open Customer Site</a></p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1>Pizza Admin</h1>
+          <p>Manage orders, menu and basic settings.</p>
+        </div>
+        <div class="topbar-right">
+          <div class="badge-status">● Online</div>
+          <span>Admin</span>
+          <div class="admin-avatar">AD</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Total Orders</div>
+          <div class="stat-value" id="statTotalOrders">0</div>
+          <div class="stat-sub">From backend JSON</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Pending Orders</div>
+          <div class="stat-value" id="statPending">0</div>
+          <div class="stat-sub">Need quick attention</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Delivered Orders</div>
+          <div class="stat-value" id="statDelivered">0</div>
+          <div class="stat-sub">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Active Pizzas</div>
+          <div class="stat-value" id="statMenuItems">0</div>
+          <div class="stat-sub">On live menu</div>
+          <div class="stat-pill">Backend data</div>
+        </div>
+      </div>
+
+      <section class="section content-section active" id="dashboard">
+        <div class="section-header">
+          <div>
+            <h2>Today’s Overview</h2>
+            <p>Top items based on orders.</p>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Top Items</th>
+                <th>Orders</th>
+                <th>Revenue (₹)</th>
+                <th>Avg. Prep Time</th>
+              </tr>
+            </thead>
+            <tbody id="topItemsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section content-section" id="orders">
+        <div class="section-header">
+          <div>
+            <h2>Orders</h2>
+            <p>View & update order status.</p>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#ID</th>
+                <th>Customer</th>
+                <th>Pizza</th>
+                <th>Qty</th>
+                <th>Amount (₹)</th>
+                <th>Status</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section content-section" id="menu">
+        <div class="section-header">
+          <div>
+            <h2>Menu Items</h2>
+            <p>Add / remove pizzas (saved in JSON file).</p>
+          </div>
+        </div>
+
+        <form class="mini-form" id="menuForm">
+          <input type="text" id="menuName" placeholder="Pizza Name" required />
+          <input type="number" id="menuPrice" placeholder="Price (₹)" required />
+          <input type="text" id="menuTag" placeholder="Tagline (e.g. Cheesy · Veg)" />
+          <input type="text" id="menuImage" placeholder="Image URL (optional)" />
+          <input type="text" id="menuCategory" placeholder="Category (e.g. Featured)" />
+          <button type="submit">+ Add Pizza</button>
+        </form>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Pizza Name</th>
+                <th>Price (₹)</th>
+                <th>Tagline</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="menuBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section content-section" id="settings">
+        <div class="section-header">
+          <div>
+            <h2>Basic Settings</h2>
+            <p>Store timings & delivery radius.</p>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <tbody>
+              <tr>
+                <th>Store Name</th>
+                <td><input type="text" id="storeName" style="width:100%;padding:.3rem;font-size:.8rem;"></td>
+              </tr>
+              <tr>
+                <th>Store Timing</th>
+                <td><input type="text" id="storeTiming" style="width:100%;padding:.3rem;font-size:.8rem;"></td>
+              </tr>
+              <tr>
+                <th>Phone / WhatsApp</th>
+                <td><input type="text" id="storePhone" style="width:100%;padding:.3rem;font-size:.8rem;"></td>
+              </tr>
+              <tr>
+                <th>Delivery Radius (km)</th>
+                <td><input type="number" id="storeRadius" style="width:100%;padding:.3rem;font-size:.8rem;"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <br>
+        <button style="border:none;background:#111827;color:#f9fafb;border-radius:999px;padding:.35rem .9rem;font-size:.8rem;cursor:pointer;" onclick="saveSettings()">
+          💾 Save Settings
+        </button>
+        <p style="font-size:.75rem;color:#6b7280;margin-top:.3rem;">
+          Settings JSON file me save honge (backend).
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ---- simple auth guard ----
+    if (localStorage.getItem("pizzaAdminLoggedIn") !== "true") {
+      window.location.href = "/admin-login.html";
+    }
+
+    let menuItems = [];
+    let orders = [];
+
+    function statusClass(status) {
+      switch (status) {
+        case "Pending": return "status-pending";
+        case "Preparing": return "status-preparing";
+        case "Delivered": return "status-delivered";
+        case "Cancelled": return "status-cancelled";
+        default: return "";
+      }
+    }
+
+    function updateStats() {
+      const total = orders.length;
+      const pending = orders.filter(o => o.status === "Pending").length;
+      const delivered = orders.filter(o => o.status === "Delivered").length;
+
+      document.getElementById("statTotalOrders").textContent = total;
+      document.getElementById("statPending").textContent = pending;
+      document.getElementById("statDelivered").textContent = delivered;
+      document.getElementById("statMenuItems").textContent = menuItems.length;
+    }
+
+    function renderOrders() {
+      const tbody = document.getElementById("ordersBody");
+      tbody.innerHTML = "";
+      orders.forEach(order => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.customer}</td>
+          <td>${order.pizza} (${order.size})</td>
+          <td>${order.qty}</td>
+          <td>₹${order.amount}</td>
+          <td><span class="status-badge ${statusClass(order.status)}">${order.status}</span></td>
+          <td>
+            <select onchange="changeOrderStatus(${order.id}, this.value)">
+              <option value="Pending" ${order.status === "Pending" ? "selected" : ""}>Pending</option>
+              <option value="Preparing" ${order.status === "Preparing" ? "selected" : ""}>Preparing</option>
+              <option value="Delivered" ${order.status === "Delivered" ? "selected" : ""}>Delivered</option>
+              <option value="Cancelled" ${order.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
+            </select>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      updateStats();
+      renderTopItems();
+    }
+
+    function renderMenu() {
+      const tbody = document.getElementById("menuBody");
+      tbody.innerHTML = "";
+      menuItems.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${item.name}</td>
+          <td>₹${item.price}</td>
+          <td>${item.tag || "-"}</td>
+          <td><button class="btn-small" onclick="deleteMenuItem(${item.id})">Remove</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      updateStats();
+      renderTopItems();
+    }
+
+    function renderTopItems() {
+      const tbody = document.getElementById("topItemsBody");
+      tbody.innerHTML = "";
+      const counts = {};
+      orders.forEach(o => {
+        if (!counts[o.pizza]) counts[o.pizza] = { orders: 0, revenue: 0, prep: 18 };
+        counts[o.pizza].orders += o.qty;
+        counts[o.pizza].revenue += o.amount;
+      });
+      const rowsData = menuItems.map(item => {
+        const stats = counts[item.name] || { orders: 0, revenue: 0, prep: 18 };
+        return { name: item.name, orders: stats.orders, revenue: stats.revenue, prep: stats.prep };
+      });
+      rowsData.sort((a, b) => b.orders - a.orders);
+      rowsData.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.name}</td>
+          <td>${row.orders}</td>
+          <td>₹${row.revenue}</td>
+          <td>${row.prep} min</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadMenuFromApi() {
+      const res = await fetch("/api/menu");
+      menuItems = await res.json();
+      renderMenu();
+    }
+
+    async function loadOrdersFromApi() {
+      const res = await fetch("/api/orders");
+      orders = await res.json();
+      renderOrders();
+    }
+
+    async function loadSettingsFromApi() {
+      const res = await fetch("/api/settings");
+      const s = await res.json();
+      document.getElementById("storeName").value = s.storeName;
+      document.getElementById("storeTiming").value = s.storeTiming;
+      document.getElementById("storePhone").value = s.storePhone;
+      document.getElementById("storeRadius").value = s.storeRadius;
+    }
+
+    const menuForm = document.getElementById("menuForm");
+    menuForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("menuName").value.trim();
+      const price = document.getElementById("menuPrice").value.trim();
+      const tag = document.getElementById("menuTag").value.trim();
+      const image = document.getElementById("menuImage").value.trim();
+      const category = document.getElementById("menuCategory").value.trim();
+
+      if (!name || !price) return;
+
+      const res = await fetch("/api/menu", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, price, tag, image, category })
+      });
+      const newItem = await res.json();
+      menuItems.push(newItem);
+      menuForm.reset();
+      renderMenu();
+    });
+
+    async function deleteMenuItem(id) {
+      await fetch(`/api/menu/${id}`, { method: "DELETE" });
+      menuItems = menuItems.filter(m => m.id !== id);
+      renderMenu();
+    }
+    window.deleteMenuItem = deleteMenuItem;
+
+    async function changeOrderStatus(id, newStatus) {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const updated = await res.json();
+      const idx = orders.findIndex(o => o.id === id);
+      if (idx !== -1) {
+        orders[idx] = updated;
+        renderOrders();
+      }
+    }
+    window.changeOrderStatus = changeOrderStatus;
+
+    async function saveSettings() {
+      const data = {
+        storeName: document.getElementById("storeName").value,
+        storeTiming: document.getElementById("storeTiming").value,
+        storePhone: document.getElementById("storePhone").value,
+        storeRadius: document.getElementById("storeRadius").value
+      };
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      await res.json();
+      alert("Settings saved to backend (JSON file).");
+    }
+    window.saveSettings = saveSettings;
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const targetId = btn.getAttribute("data-target");
+        document.querySelectorAll(".content-section").forEach(sec => sec.classList.remove("active"));
+        document.getElementById(targetId).classList.add("active");
+      });
+    });
+
+    const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+    const sidebar = document.getElementById("sidebar");
+    mobileMenuToggle.addEventListener("click", () => {
+      const isVisible = sidebar.style.display === "block";
+      sidebar.style.display = isVisible ? "none" : "block";
+    });
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (window.innerWidth <= 900) sidebar.style.display = "none";
+      });
+    });
+
+    async function init() {
+      await loadMenuFromApi();
+      await loadOrdersFromApi();
+      await loadSettingsFromApi();
+      renderTopItems();
+      updateStats();
+    }
+    init();
+  </script>
+</body>
+</html>
