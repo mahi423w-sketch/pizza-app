@@ -5,7 +5,6 @@ const fs = require("fs").promises;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 // Paths
 const DATA_DIR = path.join(__dirname, "data");
 const MENU_FILE = path.join(DATA_DIR, "menu.json");
@@ -54,7 +53,7 @@ app.get("/api/menu", async (req, res) => {
   }
 });
 
-// POST add menu item (with image + category)
+// POST add menu item
 app.post("/api/menu", async (req, res) => {
   try {
     const { name, price, tag, image, category } = req.body;
@@ -111,7 +110,7 @@ app.get("/api/orders", async (req, res) => {
   }
 });
 
-// POST create order (from customer form)
+// POST create order
 app.post("/api/orders", async (req, res) => {
   try {
     const { name, phone, pizza, size, qty, address } = req.body;
@@ -205,6 +204,23 @@ app.post("/api/settings", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Failed to save settings" });
   }
+});
+
+/* ---------- FRONTEND ROUTES FIX ---------- */
+
+// Homepage route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Admin login route
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin-login.html"));
+});
+
+// Fallback route (for other pages)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 /* ---------- START SERVER ---------- */
