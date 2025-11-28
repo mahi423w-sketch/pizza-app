@@ -419,6 +419,16 @@
       }
     }
   </style>
+
+  <!-- 🔐 FRONTEND GUARD: bina login ke admin.html open nahi hoga -->
+  <script>
+    (function () {
+      const TOKEN_KEY = "pizzaAdminAuthed";
+      if (localStorage.getItem(TOKEN_KEY) !== "true") {
+        window.location.href = "admin-login.html";
+      }
+    })();
+  </script>
 </head>
 <body>
   <!-- SIDEBAR -->
@@ -642,8 +652,10 @@
       });
     });
 
-    // Logout → simply back to login screen
+    // 🔐 Logout → token remove + login page
     document.getElementById("logoutBtn").addEventListener("click", () => {
+      const TOKEN_KEY = "pizzaAdminAuthed";
+      localStorage.removeItem(TOKEN_KEY);
       window.location.href = "admin-login.html";
     });
 
